@@ -17,12 +17,15 @@ from .commands import apply_command_replacements, load_command_replacements
 from .job_walker import iter_jobs
 from .prefixes import apply_prefix_stripping
 
+PROG_NAME = "cfn-git-pipeline-migration"
+LOG_FILE = f"{PROG_NAME}.log"
+
 logger = logging.getLogger(__name__)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="cfn-git-pipeline-migration",
+        prog=PROG_NAME,
         description=(
             "Migrate Control-M folder/job definitions: replace job commands per a "
             "CSV mapping, then strip legacy job-name prefixes."
@@ -38,7 +41,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--commands-csv",
         required=True,
         type=Path,
-        help="CSV file with 'existing_command' and 'replacement_command' columns.",
+        help="CSV file with 'Existing Command Line' and 'New Command Line Path' columns.",
     )
     parser.add_argument(
         "--output-json",
@@ -65,6 +68,8 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(
         level=args.log_level,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        filename=LOG_FILE,
+        filemode="a",
     )
 
     with args.jobs_json.open(encoding="utf-8") as f:

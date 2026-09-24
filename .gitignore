@@ -11,3 +11,9 @@ wheels/
 
 # macOS
 .DS_Store
+
+# Ruff
+.ruff_cache/
+
+# App log output
+*.log
