@@ -12,6 +12,6 @@ def append_comment_if_missing(job: dict, comment: str) -> None:
     description = job.get("Description")
     if isinstance(description, str) and description:
         if comment not in description:
-            job["Description"] = f"{description}\n{comment}"
+            job["Description"] = f"{description} {comment}"
     else:
         job["Description"] = comment
