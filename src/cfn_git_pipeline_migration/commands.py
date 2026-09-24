@@ -6,6 +6,8 @@ import csv
 import logging
 from pathlib import Path
 
+from .descriptions import append_comment_if_missing
+
 logger = logging.getLogger(__name__)
 
 EXISTING_COMMAND_COLUMN = "Existing Command Line"
@@ -83,12 +85,7 @@ def apply_command_replacements(
             continue
         logger.info("Job %r: Command updated %r -> %r", key, command, new_command)
         job["Command"] = new_command
-
-        description = job.get("Description")
-        if isinstance(description, str) and description:
-            job["Description"] = f"{description}\n{update_comment}"
-        else:
-            job["Description"] = update_comment
+        append_comment_if_missing(job, update_comment)
 
         updated += 1
     return updated

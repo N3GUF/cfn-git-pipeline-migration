@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from collections import Counter
 
+from .descriptions import append_comment_if_missing
+
 logger = logging.getLogger(__name__)
 
 # Hard-coded legacy job-name prefixes to remove during migration.
@@ -36,11 +38,14 @@ def _rename_key(container: dict, old_key: str, new_key: str) -> None:
     container.update(items)
 
 
-def apply_prefix_stripping(jobs: list[tuple[dict, str]]) -> int:
+def apply_prefix_stripping(jobs: list[tuple[dict, str]], update_comment: str) -> int:
     """Strip legacy prefixes from job names and their descriptions, in place.
 
-    Renames the job's dict key and removes the literal prefix text from the
-    job's Description field, if present. Returns the count of jobs renamed.
+    Renames the job's dict key, removes the literal prefix text from the
+    job's Description field if present, and appends `update_comment` to the
+    Description (skipped if that exact comment is already there, e.g. because
+    the same job's Command was also replaced). Returns the count of jobs
+    renamed.
 
     If stripping a prefix would make two or more jobs in the same folder end
     up with the same name, none of the colliding jobs are renamed (or have
@@ -78,6 +83,7 @@ def apply_prefix_stripping(jobs: list[tuple[dict, str]]) -> int:
             description = job.get("Description")
             if isinstance(description, str) and prefix in description:
                 job["Description"] = description.replace(prefix, "")
+            append_comment_if_missing(job, update_comment)
 
             _rename_key(container, key, new_key)
             renamed += 1

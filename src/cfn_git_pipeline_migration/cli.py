@@ -52,7 +52,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--update-comment",
         required=True,
-        help="Comment appended to the Description of every job whose Command is replaced.",
+        help=(
+            "Comment appended to the Description of every job that is updated "
+            "(Command replaced and/or a legacy prefix stripped)."
+        ),
     )
     parser.add_argument(
         "--log-level",
@@ -82,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
     replacements = load_command_replacements(args.commands_csv)
     jobs_updated = apply_command_replacements(jobs, replacements, args.update_comment)
 
-    jobs_renamed = apply_prefix_stripping(jobs)
+    jobs_renamed = apply_prefix_stripping(jobs, args.update_comment)
 
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     with args.output_json.open("w", encoding="utf-8") as f:
