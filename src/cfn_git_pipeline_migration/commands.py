@@ -8,11 +8,13 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_COLUMNS = {"existing_command", "replacement_command"}
+EXISTING_COMMAND_COLUMN = "Existing Command Line"
+REPLACEMENT_COMMAND_COLUMN = "New Command Line Path"
+REQUIRED_COLUMNS = {EXISTING_COMMAND_COLUMN, REPLACEMENT_COMMAND_COLUMN}
 
 
 def load_command_replacements(csv_path: Path) -> dict[str, str]:
-    """Read existing_command -> replacement_command pairs from a CSV file.
+    """Read existing/replacement command pairs from a CSV file.
 
     Rows are skipped (with no update needed) when the replacement command is
     blank, or identical to the existing command.
@@ -20,7 +22,8 @@ def load_command_replacements(csv_path: Path) -> dict[str, str]:
     replacements: dict[str, str] = {}
     skipped = 0
 
-    with csv_path.open(newline="", encoding="utf-8") as f:
+    # utf-8-sig transparently strips a leading BOM (e.g. from Excel-exported CSVs).
+    with csv_path.open(newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         fieldnames = {name.strip() for name in (reader.fieldnames or [])}
         if not REQUIRED_COLUMNS.issubset(fieldnames):
@@ -30,8 +33,8 @@ def load_command_replacements(csv_path: Path) -> dict[str, str]:
             )
 
         for row in reader:
-            existing = (row.get("existing_command") or "").strip()
-            replacement = (row.get("replacement_command") or "").strip()
+            existing = (row.get(EXISTING_COMMAND_COLUMN) or "").strip()
+            replacement = (row.get(REPLACEMENT_COMMAND_COLUMN) or "").strip()
 
             if not existing:
                 continue
